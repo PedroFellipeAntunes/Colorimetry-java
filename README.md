@@ -21,7 +21,7 @@ Add the JitPack repository and the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.PedroFellipeAntunes</groupId>
     <artifactId>Colorimetry-java</artifactId>
-    <version>v1.0.2</version>
+    <version>v1.0.0</version>
 </dependency>
 ```
 
