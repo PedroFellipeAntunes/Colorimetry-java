@@ -1,0 +1,12 @@
+target/
+color_tests/
+*.class
+*.jar
+*.log
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+nbproject/private/
+build/
