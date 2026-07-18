@@ -1,6 +1,14 @@
 # Colorimetry
 
-[![](https://jitpack.io/v/PedroFellipeAntunes/Colorimetry-java.svg)](https://jitpack.io/#PedroFellipeAntunes/Colorimetry-java)
+<p align="center">
+  <img src="/images/logo.jpg" alt="Colorimetry Logo" />
+</p>
+
+<p align="center">
+  <a href="https://jitpack.io/#PedroFellipeAntunes/Colorimetry-java">
+    <img src="https://jitpack.io/v/PedroFellipeAntunes/Colorimetry-java.svg" alt="JitPack" />
+  </a>
+</p>
 
 A Java library for color space conversion and grayscale transformation. Any color in any space can be converted to any other space through a parent hierarchy rooted at CIE XYZ D65, and any color can be desaturated using different grayscale methods.
 
@@ -140,6 +148,8 @@ Root spaces (those whose parent is `Xyz`) must also override `isBounded()`, `isI
 
 ### Color spaces
 
+<div align="center">
+
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
 | sRGB | R [0, 255], G [0, 255], B [0, 255] | Yes | IEC 61966-2-1, 1999 |
@@ -160,6 +170,8 @@ Root spaces (those whose parent is `Xyz`) must also override `isBounded()`, `isI
 | OK LCh | L [0, 1], C [0, 0.33], H [0, 360) | No | B. Ottosson, 2020 |
 | JzAzBz | Jz [0, 0.02], az [-0.02, 0.02], bz [-0.02, 0.02] | No | Safdar et al., 2017 |
 | JzCzHz | Jz [0, 0.02], Cz [0, 0.025], Hz [0, 360) | No | Safdar et al., 2017 (cylindrical) |
+
+</div>
 
 ## Grayscale
 
@@ -194,6 +206,8 @@ GrayscaleRegistry.register(MyGrayscale.INSTANCE);
 
 ### Grayscale methods
 
+<div align="center">
+
 | Name | Formula | Source |
 |------|---------|--------|
 | Red Channel | R | — |
@@ -213,3 +227,4 @@ GrayscaleRegistry.register(MyGrayscale.INSTANCE);
 | Oklab L Lightness | L from Oklab | B. Ottosson, 2020 |
 | HSP Perceived Brightness | √(0.299R² + 0.587G² + 0.114B²) | D. R. Finley |
 
+</div>
