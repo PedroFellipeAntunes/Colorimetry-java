@@ -1,10 +1,7 @@
 package colorimetry_test;
 
-import colorimetry.ColorValue;
-import colorimetry.Grayscale;
-import colorimetry.GrayscaleRegistry;
-import colorimetry_test.utils.BatchRunner;
-import colorimetry_test.utils.ErrorLog;
+import colorimetry.*;
+import colorimetry_test.utils.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -25,6 +22,12 @@ import java.util.List;
  * Requires: ColorSpaceAtlasTest to have been run first.
  */
 public final class GrayscaleAtlasTest {
+    /** Optional: filter by atlas filename. Empty = all atlases. Overridden by args[0]. */
+    private static final String FILTER_ATLAS = "";
+
+    /** Optional: filter by method name. Empty = all methods. Overridden by args[1]. */
+    private static final String FILTER_METHOD = "";
+
     public static void main(String[] args) throws Exception {
         File atlasDir = new File("color_tests/color_spaces");
         
@@ -35,14 +38,40 @@ public final class GrayscaleAtlasTest {
             return;
         }
 
+        // Resolve filters: args > vars > all
+        String filterAtlas = args.length > 0 ? args[0] : FILTER_ATLAS;
+        String filterMethod = args.length > 1 ? args[1] : FILTER_METHOD;
+
         File[] atlasFiles = atlasDir.listFiles((dir, name) -> name.endsWith(".png"));
+
         if (atlasFiles == null || atlasFiles.length == 0) {
             System.err.println("No atlas images found in " + atlasDir.getAbsolutePath());
             
             return;
         }
 
+        if (!filterAtlas.isEmpty()) {
+            atlasFiles = Arrays.stream(atlasFiles).filter(f -> f.getName().contains(filterAtlas)).toArray(File[]::new);
+        }
+
+        if (atlasFiles.length == 0) {
+            System.err.println("No matching atlas files found.");
+
+            return;
+        }
+
         List<Grayscale> methods = GrayscaleRegistry.getMethods();
+
+        if (!filterMethod.isEmpty()) {
+            methods = methods.stream().filter(m -> m.displayName().contains(filterMethod)).collect(java.util.stream.Collectors.toList());
+        }
+
+        if (methods.isEmpty()) {
+            System.err.println("No matching grayscale methods found.");
+
+            return;
+        }
+
         int workers = Runtime.getRuntime().availableProcessors();
         int concurrentMethods = Math.min(workers, methods.size());
 
@@ -57,8 +86,10 @@ public final class GrayscaleAtlasTest {
         // Per atlas: 1 source int[] + concurrent method output int[] arrays
         long bytesPerAtlas = pixelCount * 4 * (1 + concurrentMethods);
 
+        List<Grayscale> finalMethods = methods;
+
         BatchRunner.run(Arrays.asList(atlasFiles), bytesPerAtlas, atlasFile -> {
-            processAtlas(atlasFile, methods);
+            processAtlas(atlasFile, finalMethods);
         });
 
         System.out.println("Done.");
@@ -84,7 +115,7 @@ public final class GrayscaleAtlasTest {
         // Read source pixels once as flat int[] (shared, read-only by all methods)
         int[] sourcePixels = atlas.getRGB(0, 0, width, height, null, 0, width);
 
-        // Free the BufferedImage — only the int[] is needed from here
+        // Free the BufferedImage, only the int[] is needed from here
         atlas = null;
 
         File outputDir = new File("color_tests/grayscale/" + atlasName);
@@ -115,6 +146,7 @@ public final class GrayscaleAtlasTest {
             grayImage.setRGB(0, 0, width, height, outPixels, 0, width);
 
             File outputFile = new File(outputDir, "gray_" + methodName + ".png");
+            
             try {
                 ImageIO.write(grayImage, "PNG", outputFile);
             } catch (IOException e) {

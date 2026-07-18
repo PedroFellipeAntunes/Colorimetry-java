@@ -1,10 +1,7 @@
 package colorimetry_test;
 
-import colorimetry.ColorSpace;
-import colorimetry.ColorValue;
-import colorimetry.Grayscale;
-import colorimetry.GrayscaleRegistry;
-import colorimetry.spaces.Hsl;
+import colorimetry.*;
+import colorimetry.spaces.*;
 import colorimetry_test.utils.ErrorLog;
 
 import javax.imageio.ImageIO;
@@ -16,18 +13,21 @@ import java.util.List;
 /**
  * Generates grayscale comparison images from a color space gradient.
  *
- * Generates a reference gradient in GRADIENT_SPACE, then applies each registered
- * grayscale method and saves a separate image.
+ * Generates a reference gradient in GRADIENT_SPACE (sequential), then applies
+ * each registered grayscale method in parallel and saves a separate image.
  *
  * Output: color_tests/grayscale/reference_{spaceName}.png
  *         color_tests/grayscale/gray_{methodName}.png
  */
 public final class GrayscaleGradientTest {
-    /** Color space used for the reference gradient. */
+    /** Color space for the reference gradient. Overridden by args[0]. */
     private static final ColorSpace GRADIENT_SPACE = Hsl.INSTANCE;
 
-    /** Which channel (0, 1, or 2) varies across X. */
+    /** Which channel (0, 1, or 2) varies across X. Overridden by args[1]. */
     private static final int GRADIENT_CHANNEL = 0;
+
+    /** Optional: filter by method name. Empty = all methods. Overridden by args[2]. */
+    private static final String FILTER_METHOD = "";
 
     private static final int WIDTH = 512;
     private static final int HEIGHT = WIDTH;
@@ -36,7 +36,23 @@ public final class GrayscaleGradientTest {
         File outputDir = new File("color_tests/grayscale/gradient");
         outputDir.mkdirs();
 
-        int xCh = GRADIENT_CHANNEL;
+        // Resolve gradient space: args[0] > GRADIENT_SPACE
+        ColorSpace gradientSpace = GRADIENT_SPACE;
+
+        if (args.length > 0) {
+            String spaceName = args[0];
+            gradientSpace = ColorSpaceRegistry.getSpaces().stream()
+                .filter(s -> s.displayName().contains(spaceName))
+                .findFirst()
+                .orElse(GRADIENT_SPACE);
+        }
+
+        // Resolve channel: args[1] > GRADIENT_CHANNEL
+        int xCh = args.length > 1 ? Integer.parseInt(args[1]) : GRADIENT_CHANNEL;
+
+        // Resolve method filter: args[2] > FILTER_METHOD > all
+        String filterMethod = args.length > 2 ? args[2] : FILTER_METHOD;
+
         int yCh;
         int fixedCh;
         
@@ -55,20 +71,31 @@ public final class GrayscaleGradientTest {
             }
         }
 
-        double fixedValue = GRADIENT_SPACE.componentDefault(fixedCh);
-        double xMin = GRADIENT_SPACE.componentMin(xCh);
-        double xMax = GRADIENT_SPACE.componentMax(xCh);
-        double yMin = GRADIENT_SPACE.componentMin(yCh);
-        double yMax = GRADIENT_SPACE.componentMax(yCh);
+        double fixedValue = gradientSpace.componentDefault(fixedCh);
+        double xMin = gradientSpace.componentMin(xCh);
+        double xMax = gradientSpace.componentMax(xCh);
+        double yMin = gradientSpace.componentMin(yCh);
+        double yMax = gradientSpace.componentMax(yCh);
 
         List<Grayscale> methods = GrayscaleRegistry.getMethods();
+
+        if (!filterMethod.isEmpty()) {
+            methods = methods.stream().filter(m -> m.displayName().contains(filterMethod)).collect(java.util.stream.Collectors.toList());
+        }
+
+        if (methods.isEmpty()) {
+            System.err.println("No matching grayscale methods found.");
+
+            return;
+        }
+
         System.out.println("=== Grayscale Gradient Test ===");
-        System.out.println("Space: " + GRADIENT_SPACE.displayName() + " | X: " + GRADIENT_SPACE.componentName(xCh, true)
-            + " | Y: " + GRADIENT_SPACE.componentName(yCh, true) + " | Fixed: " + GRADIENT_SPACE.componentName(fixedCh, true) + "=" + fixedValue);
+        System.out.println("Space: " + gradientSpace.displayName() + " | X: " + gradientSpace.componentName(xCh, true)
+            + " | Y: " + gradientSpace.componentName(yCh, true) + " | Fixed: " + gradientSpace.componentName(fixedCh, true) + "=" + fixedValue);
         System.out.println("Methods: " + methods.size() + " | Size: " + WIDTH + "x" + HEIGHT + "\n");
 
-        // Generate reference gradient (sequential — methods depend on it)
-        int channels = GRADIENT_SPACE.componentCount();
+        // Generate reference gradient
+        int channels = gradientSpace.componentCount();
         ColorValue[][] reference = new ColorValue[WIDTH][HEIGHT];
         int[] refPixels = new int[WIDTH * HEIGHT];
 
@@ -87,7 +114,7 @@ public final class GrayscaleGradientTest {
                 raw[fixedCh] = fixedValue;
 
                 try {
-                    ColorValue color = ColorValue.of(GRADIENT_SPACE, raw);
+                    ColorValue color = ColorValue.of(gradientSpace, raw);
                     reference[x][y] = color;
                     refPixels[y * WIDTH + x] = color.toAWT().getRGB();
                 } catch (Exception e) {
@@ -101,7 +128,7 @@ public final class GrayscaleGradientTest {
         BufferedImage refImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         refImage.setRGB(0, 0, WIDTH, HEIGHT, refPixels, 0, WIDTH);
 
-        String spaceName = GRADIENT_SPACE.displayName().replace(" ", "_");
+        String spaceName = gradientSpace.displayName().replace(" ", "_");
         File refFile = new File(outputDir, "reference_" + spaceName + ".png");
         ImageIO.write(refImage, "PNG", refFile);
         ColorTestUtil.printResult(refFile.getName(), System.currentTimeMillis() - refStart, refLog);
@@ -133,6 +160,7 @@ public final class GrayscaleGradientTest {
             image.setRGB(0, 0, WIDTH, HEIGHT, pixels, 0, WIDTH);
 
             File outputFile = new File(outputDir, "gray_" + methodName + ".png");
+            
             try {
                 ImageIO.write(image, "PNG", outputFile);
             } catch (IOException e) {

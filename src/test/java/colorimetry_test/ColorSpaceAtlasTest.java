@@ -1,8 +1,7 @@
 package colorimetry_test;
 
 import colorimetry.*;
-import colorimetry_test.utils.BatchRunner;
-import colorimetry_test.utils.ErrorLog;
+import colorimetry_test.utils.*;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,22 +29,40 @@ public final class ColorSpaceAtlasTest {
     private static final int ATLAS_SIZE = TILE_SIZE * GRID_SIZE;
     private static final int TOTAL_TILES = GRID_SIZE * GRID_SIZE;
 
-    /** Which channel (0, 1, or 2) varies across the tile grid. */
+    /** Optional: filter by space name. Empty = all spaces. Overridden by args[0]. */
+    private static final String FILTER_SPACE = "";
+
+    /** Which channel (0, 1, or 2) varies across the tile grid. Overridden by args[1]. */
     private static final int GRID_CHANNEL = 0;
 
     public static void main(String[] args) throws Exception {
         File outputDir = new File("color_tests/color_spaces");
         outputDir.mkdirs();
 
+        // Resolve filter: args[0] > FILTER_SPACE > all
+        String filterSpace = args.length > 0 ? args[0] : FILTER_SPACE;
+        int gridChannel = args.length > 1 ? Integer.parseInt(args[1]) : GRID_CHANNEL;
+
         List<ColorSpace> spaces = ColorSpaceRegistry.getSpaces();
+
+        if (!filterSpace.isEmpty()) {
+            spaces = spaces.stream().filter(s -> s.displayName().contains(filterSpace)).collect(java.util.stream.Collectors.toList());
+        }
+
+        if (spaces.isEmpty()) {
+            System.err.println("No matching color spaces found.");
+
+            return;
+        }
+
         System.out.println("=== Color Space Atlas Generation ===");
-        System.out.println("Spaces: " + spaces.size() + " | Grid channel: " + GRID_CHANNEL + " | Atlas: " + ATLAS_SIZE + "x" + ATLAS_SIZE);
+        System.out.println("Spaces: " + spaces.size() + " | Grid channel: " + gridChannel + " | Atlas: " + ATLAS_SIZE + "x" + ATLAS_SIZE);
 
         // One int[] pixel buffer per concurrent atlas
         long bytesPerAtlas = (long) ATLAS_SIZE * ATLAS_SIZE * 4;
 
         BatchRunner.run(spaces, bytesPerAtlas, space -> {
-            generateAtlas(space, outputDir);
+            generateAtlas(space, outputDir, gridChannel);
         });
 
         System.out.println("Done. Output: " + outputDir.getAbsolutePath());
@@ -57,9 +74,10 @@ public final class ColorSpaceAtlasTest {
      *
      * @param space color space to visualize
      * @param outputDir directory to write the PNG
+     * @param gridCh which channel varies across the tile grid
      * @throws IOException if writing fails
      */
-    private static void generateAtlas(ColorSpace space, File outputDir) throws IOException {
+    private static void generateAtlas(ColorSpace space, File outputDir, int gridCh) throws IOException {
         String name = space.displayName().replace(" ", "_");
         long start = System.currentTimeMillis();
         ErrorLog log = new ErrorLog();
@@ -67,7 +85,6 @@ public final class ColorSpaceAtlasTest {
         int channels = space.componentCount();
 
         // Assign remaining channels to X and Y axes based on which one is the grid channel
-        int gridCh = GRID_CHANNEL;
         int xCh;
         int yCh;
         
@@ -86,7 +103,7 @@ public final class ColorSpaceAtlasTest {
             }
         }
 
-        // Flat pixel buffer — tiles write to non-overlapping regions
+        // Flat pixel buffer, tiles write to non-overlapping regions
         int[] pixels = new int[ATLAS_SIZE * ATLAS_SIZE];
 
         // Capture effectively-final channel indices for lambda
