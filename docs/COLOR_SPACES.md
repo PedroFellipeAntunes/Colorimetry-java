@@ -1,6 +1,6 @@
 # Color Spaces
 
-Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [hierarchy tree](../README.md#hierarchy) for how they connect.
+Full catalog of all color spaces in Colorimetry, grouped by family. See the [hierarchy tree](../README.md#hierarchy) for how they connect.
 
 ## Table of contents
 
@@ -17,6 +17,8 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 
 ## XYZ adapted
 
+<div align="center">
+
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
 | CIE XYZ D65 | X, Y, Z | No | CIE 1931, D65 illuminant |
@@ -24,7 +26,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | CIE XYZ D60 | X, Y, Z | No | CIE 1931, D60 illuminant |
 | xyY | x [0, 1], y [0, 1], Y [0, 1] | No | CIE 1931 chromaticity |
 
+</div>
+
 ## Linear RGB
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -35,7 +41,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | Adobe RGB Linear | R, G, B [0, 255] | Yes | Adobe Systems, 1998 |
 | ProPhoto RGB Linear | R, G, B [0, 255] | Yes | Kodak ROMM RGB |
 
+</div>
+
 ## Gamma RGB
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -45,7 +55,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | ProPhoto RGB | R, G, B [0, 255] | Yes | Kodak ROMM RGB |
 | Rec. 2020 | R, G, B [0, 255] | Yes | ITU-R BT.2020, 2012 |
 
+</div>
+
 ## Subtractive and artistic
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -53,7 +67,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | CMYK | C, M, Y, K [0, 100] | Yes | Subtractive model (naive UCR) |
 | RYB | R, Y, B [0, 255] | Yes | Trilinear interpolation |
 
+</div>
+
 ## Hue-based (cylindrical from RGB)
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -66,7 +84,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | HWB | H [0, 360), W [0, 100], B [0, 100] | Yes | A. R. Smith, 1996 |
 | HSP | H [0, 360), S [0, 100], P [0, 100] | Yes | D. R. Finley |
 
+</div>
+
 ## CIE perceptual
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -77,7 +99,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | HSLuv | H [0, 360), S [0, 100], L [0, 100] | No | Boronine, based on CIE LCHuv |
 | HPLuv | H [0, 360), S [0, 100], L [0, 100] | No | Boronine, pastel variant |
 
+</div>
+
 ## LMS and derivatives
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -85,7 +111,11 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | IPT | I [0, 1], P [-1, 1], T [-1, 1] | No | Ebner & Fairchild, 1998 |
 | IgPgTg | Ig [0, 1], Pg [-1, 1], Tg [-1, 1] | No | Hellwig & Fairchild, 2022 |
 
+</div>
+
 ## Modern perceptual
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -99,14 +129,22 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | XYB | X [-0.04, 0.04], Y [0, 0.85], B [-0.4, 0.4] | No | JPEG XL |
 | MSH | M [0, 180], S [0, 180], H [0, 360) | No | Moreland, 2009 (diverging colormaps) |
 
+</div>
+
 ## ACES
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
 | ACES 2065-1 | R, G, B [0, 1] | No | SMPTE ST 2065-1 |
 | ACEScg | R, G, B [0, 1] | No | SMPTE / ACEScg |
 
+</div>
+
 ## Color Appearance Models
+
+<div align="center">
 
 | Name | Channels | Bounded | Source |
 |------|----------|---------|--------|
@@ -116,3 +154,5 @@ Full catalog of all 54 color spaces in Colorimetry, grouped by family. See the [
 | CAM02 UCS | J' [0, 100], a' [-100, 100], b' [-100, 100] | No | Luo et al., 2006 (uniform) |
 | HCT | H [0, 360), C [0, 120], T [0, 100] | No | Material Design 3 (Google) |
 | ZCAM | J [0, 100], M [0, 65], h [0, 360) | No | Safdar et al., 2021 |
+
+</div>

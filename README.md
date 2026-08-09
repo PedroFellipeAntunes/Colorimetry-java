@@ -10,7 +10,7 @@
   </a>
 </p>
 
-A Java library for color space conversion and grayscale transformation. Any color in any of 54 spaces can be converted to any other through a parent hierarchy rooted at CIE XYZ, and any color can be desaturated using 16 different grayscale methods.
+A Java library for color space conversion and grayscale transformation. Any color in any space can be converted to any other through a parent hierarchy rooted at CIE XYZ, and any color can be desaturated using many different grayscale methods.
 
 ## Table of contents
 
@@ -43,7 +43,7 @@ Add the JitPack repository and the dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.PedroFellipeAntunes</groupId>
     <artifactId>Colorimetry-java</artifactId>
-    <version>v1.0.0</version>
+    <version>LATEST</version>
 </dependency>
 ```
 
@@ -298,6 +298,6 @@ GrayscaleRegistry.register(MyGrayscale.INSTANCE);
 
 ## Reference
 
-- [Color spaces](docs/COLOR_SPACES.md) - full catalog with channels, ranges, and sources for all 54 spaces.
-- [Grayscale methods](docs/GRAYSCALE_METHODS.md) - formulas and sources for all 16 methods.
+- [Color spaces](docs/COLOR_SPACES.md) - full catalog with channels, ranges, and sources for all spaces.
+- [Grayscale methods](docs/GRAYSCALE_METHODS.md) - formulas and sources for all methods.
 - [Contributing](CONTRIBUTING.md) - code style, setup, and how to add new spaces or methods.

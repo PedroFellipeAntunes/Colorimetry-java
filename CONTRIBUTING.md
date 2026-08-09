@@ -61,7 +61,7 @@ mvn exec:java -Dexec.mainClass=colorimetry_test.ParentAtlasTest
 
 # Export gamut CSVs for 3D visualization
 mvn exec:java -Dexec.mainClass=colorimetry_test.ColorSpaceGamutExport
-mvn exec:java -Dexec.mainClass=colorimetry_test.ColorSpaceGamutExport -Dexec.args="OKLab 0.01 true"
+mvn exec:java -Dexec.mainClass=colorimetry_test.ColorSpaceGamutExport -Dexec.args="OKLab 4 true"
 ```
 
 ## Code style
