@@ -20,7 +20,6 @@ A Java library for color space conversion and grayscale transformation. Any colo
 - [Color conversion](#color-conversion)
   - [Hierarchy](#hierarchy)
   - [Configurable parents](#configurable-parents)
-  - [Pipeline](#pipeline)
   - [Creating a color space](#creating-a-color-space)
 - [Grayscale](#grayscale)
   - [Creating a grayscale method](#creating-a-grayscale-method)
@@ -57,7 +56,7 @@ cd Colorimetry-java
 mvn install
 ```
 
-Requires Java 24+.
+Requires Java 14+.
 
 ## Usage
 
@@ -101,7 +100,9 @@ ColorValue gray = sky.toGrayscale(Bt709Luma.INSTANCE);
 
 ### Validation
 
-By default, out-of-range values pass through unchanged. You can set a global validation mode:
+`ValidationMode` controls what happens when you create a color with out-of-range values on bounded channels.
+
+For example, `ColorValue.of(Hsb.INSTANCE, 400, 120, 90)` has H=400 (max is 360) and S=120 (max is 100). By default these pass through silently, but you can change that:
 
 ```java
 // Clamp bounded channels to their valid range silently
@@ -117,6 +118,14 @@ ColorValue.setValidationMode(ValidationMode.NONE);
 Unbounded channels (like CIE Lab a\*/b\*) are never affected regardless of mode.
 
 ## Color conversion
+
+Conversions are automatic. Call `.to(targetSpace)` and the library handles the rest, walking the hierarchy tree and applying gamut mapping when needed:
+
+```java
+ColorValue sky = ColorValue.of(Hsb.INSTANCE, 210, 80, 90);
+ColorValue lab = sky.to(CieLab.INSTANCE);
+ColorValue ok = lab.to(Oklab.INSTANCE);
+```
 
 ### Hierarchy
 
@@ -192,23 +201,6 @@ ColorValue color = ColorValue.of(hsb2020, 120, 80, 90);
 ```
 
 The accepted parent type is enforced at compile time via marker interfaces (`RgbLike`, `XyzLike`, `LabLike`).
-
-### Pipeline
-
-When you call `color.to(targetSpace)`, `ColorConverter` finds the **Lowest Common Ancestor (LCA)** of the two spaces in the tree, walks up from the source via `toParent()`, then down to the target via `fromParent()`. Spaces in the same family never touch XYZ:
-
-```
-HSB → HSL (same family, LCA = BT.709 RGB Linear)
-  HSB ──toParent──▷ BT.709 RGB Linear ──fromParent──▷ HSL
-
-OK Lab → OK LCh (parent to child)
-  OK Lab ──fromParent──▷ OK LCh
-
-HSB → OK Lab (cross-family, LCA = CIE XYZ D65)
-  HSB ──toParent──▷ BT.709 RGB Linear ──toParent──▷ XYZ D65 ──fromParent──▷ OK Lab
-```
-
-**Gamut mapping** triggers automatically when the walk-down enters a bounded space (like a linear RGB) from an unbounded parent (like XYZ). The `GamutMapper` uses binary search between the out-of-gamut point and the space's `neutralXyz()` anchor to find the closest in-gamut color.
 
 ### Creating a color space
 
@@ -300,4 +292,7 @@ GrayscaleRegistry.register(MyGrayscale.INSTANCE);
 
 - [Color spaces](docs/COLOR_SPACES.md) - full catalog with channels, ranges, and sources for all spaces.
 - [Grayscale methods](docs/GRAYSCALE_METHODS.md) - formulas and sources for all methods.
-- [Contributing](CONTRIBUTING.md) - code style, setup, and how to add new spaces or methods.
+- [Contributing](CONTRIBUTING.md) - how to add new spaces, methods, and submit PRs.
+- [Code style](docs/CODE_STYLE.md) - formatting rules and comment conventions.
+- [Architecture](docs/ARCHITECTURE.md) - conversion pipeline and gamut mapping internals.
+- [Testing](docs/TESTING.md) - all test programs, arguments, and usage examples.
