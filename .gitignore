@@ -10,3 +10,6 @@ color_tests/
 .classpath
 nbproject/private/
 build/
+python/**/
+!python/**/*.py
+nb-configuration.xml

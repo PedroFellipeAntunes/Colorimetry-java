@@ -1,5 +1,9 @@
 package colorimetry;
 
+import colorimetry.bridge.*;
+import colorimetry.engine.*;
+import colorimetry.spaces.xyz.XyzD65;
+
 /**
  * A color value in a specific color space, stored internally as raw doubles in the
  * native units of that space (e.g. sRGB 0-255, HSB 0-360/0-100/0-100, CIE Lab 0-100/-128..127/-128..127).
@@ -32,6 +36,8 @@ public final class ColorValue {
     /** Display label for the alpha channel, used by UI components. */
     public static final String ALPHA_LABEL = "Alpha";
 
+    private static volatile ValidationMode validationMode = ValidationMode.NONE;
+
     private final double[] raw;
     private final ColorSpace space;
     private final double alpha;
@@ -47,7 +53,71 @@ public final class ColorValue {
     private ColorValue(double[] raw, ColorSpace space, double alpha) {
         this.raw = raw.clone();
         this.space = space;
-        this.alpha = Math.max(0.0, Math.min(1.0, alpha));
+        this.alpha = ColorSpace.clamp(alpha, 0.0, 1.0);
+    }
+
+    // ===== VALIDATION =====
+
+    /**
+     * Sets the global validation mode for all factory methods.
+     *
+     * @param mode validation mode to apply
+     */
+    public static void setValidationMode(ValidationMode mode) {
+        validationMode = mode;
+    }
+
+    /**
+     * Returns the current global validation mode.
+     *
+     * @return current validation mode
+     */
+    public static ValidationMode getValidationMode() {
+        return validationMode;
+    }
+
+    /**
+     * Validates raw channel values against the space's bounds.
+     * Only bounded channels ({@link ColorSpace#isChannelBounded(int)}) are checked.
+     * Floating-point drift within eps is silently clamped in both modes.
+     *
+     * @param space color space descriptor
+     * @param values raw channel values
+     * @return validated values (cloned if modified)
+     * @throws IllegalArgumentException in ERROR mode if a bounded channel
+     *         is outside [min - eps, max + eps]
+     */
+    private static double[] validate(ColorSpace space, double[] values) {
+        ValidationMode mode = validationMode;
+
+        if (mode == ValidationMode.NONE) {
+            return values;
+        }
+
+        double eps = 1e-10;
+        double[] result = values.clone();
+
+        for (int i = 0; i < result.length; i++) {
+            if (!space.isChannelBounded(i)) {
+                continue;
+            }
+
+            double min = space.componentMin(i);
+            double max = space.componentMax(i);
+
+            if (result[i] < min - eps || result[i] > max + eps) {
+                if (mode == ValidationMode.ERROR) {
+                    throw new IllegalArgumentException(
+                        space.displayName() + " " + space.componentName(i, false)
+                        + ": " + result[i] + " outside [" + min + ", " + max + "]"
+                    );
+                }
+            }
+
+            result[i] = ColorSpace.clamp(result[i], min, max);
+        }
+
+        return result;
     }
 
     // ===== FACTORIES =====
@@ -60,7 +130,7 @@ public final class ColorValue {
      * @return new ColorValue
      */
     public static ColorValue of(ColorSpace space, double... values) {
-        return new ColorValue(values, space, 1.0);
+        return new ColorValue(validate(space, values), space, 1.0);
     }
 
     /**
@@ -72,7 +142,7 @@ public final class ColorValue {
      * @return new ColorValue
      */
     public static ColorValue of(ColorSpace space, double[] values, double alpha) {
-        return new ColorValue(values, space, alpha);
+        return new ColorValue(validate(space, values), space, alpha);
     }
 
     /**
@@ -84,7 +154,7 @@ public final class ColorValue {
      * @return new ColorValue
      */
     public static ColorValue ofNormalized(ColorSpace space, double... values) {
-        return new ColorValue(space.denormalize(values), space, 1.0);
+        return new ColorValue(validate(space, space.denormalize(values)), space, 1.0);
     }
 
     /**
@@ -97,7 +167,7 @@ public final class ColorValue {
      * @return new ColorValue
      */
     public static ColorValue ofNormalized(ColorSpace space, double[] values, double alpha) {
-        return new ColorValue(space.denormalize(values), space, alpha);
+        return new ColorValue(validate(space, space.denormalize(values)), space, alpha);
     }
 
     // ===== CONVERSION =====
@@ -126,7 +196,7 @@ public final class ColorValue {
      * @return new ColorValue with the gray equivalent, alpha preserved
      */
     public ColorValue toGrayscale(Grayscale method) {
-        double[] xyz = ColorConverter.convert(space, colorimetry.spaces.Xyz.INSTANCE, raw);
+        double[] xyz = ColorConverter.convert(space, XyzD65.INSTANCE, raw);
         double[] grayXyz = method.toGrayXyz(xyz);
 
         // Gray point may land outside the gamut of the original space
@@ -134,7 +204,7 @@ public final class ColorValue {
             grayXyz = GamutMapper.map(grayXyz, space);
         }
 
-        double[] result = ColorConverter.convert(colorimetry.spaces.Xyz.INSTANCE, space, grayXyz);
+        double[] result = ColorConverter.convert(XyzD65.INSTANCE, space, grayXyz);
         
         return new ColorValue(result, space, alpha);
     }
@@ -142,22 +212,28 @@ public final class ColorValue {
     // ===== ACCESSORS =====
 
     /**
-     * Returns the raw value for a single channel.
+     * Returns the raw value for a single channel, formatted by the space.
      *
      * @param i channel index
      * @return raw value in native units
      */
     public double get(int i) {
-        return raw[i];
+        return space.formatRaw(raw[i]);
     }
 
     /**
-     * Returns a copy of all raw channel values.
+     * Returns a copy of all raw channel values, formatted by the space.
      *
-     * @return raw values array (defensive copy)
+     * @return raw values array
      */
-    public double[] getRaw() {
-        return raw.clone();
+    public double[] get() {
+        double[] result = new double[raw.length];
+
+        for (int i = 0; i < raw.length; i++) {
+            result[i] = space.formatRaw(raw[i]);
+        }
+
+        return result;
     }
 
     /**
@@ -175,7 +251,7 @@ public final class ColorValue {
      *
      * @return normalized values array
      */
-    public double[] getNormalizedValues() {
+    public double[] getNormalized() {
         return space.normalize(raw);
     }
 

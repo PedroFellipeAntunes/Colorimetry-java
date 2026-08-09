@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>PFCA</groupId>
     <artifactId>Colorimetry-java</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     <name>Colorimetry</name>
     <description>Color space conversion and grayscale library for Java</description>
@@ -18,7 +18,7 @@
     </licenses>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>24</maven.compiler.release>
+        <maven.compiler.release>14</maven.compiler.release>
     </properties>
     <build>
         <plugins>
@@ -27,7 +27,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>24</release>
+                    <release>14</release>
                 </configuration>
             </plugin>
             <plugin>

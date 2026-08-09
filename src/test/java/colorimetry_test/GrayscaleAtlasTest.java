@@ -1,5 +1,6 @@
 package colorimetry_test;
 
+import colorimetry_test.utils.ColorTestUtil;
 import colorimetry.*;
 import colorimetry_test.utils.*;
 
@@ -51,7 +52,8 @@ public final class GrayscaleAtlasTest {
         }
 
         if (!filterAtlas.isEmpty()) {
-            atlasFiles = Arrays.stream(atlasFiles).filter(f -> f.getName().contains(filterAtlas)).toArray(File[]::new);
+            String key = ColorTestUtil.normalizeName(filterAtlas);
+            atlasFiles = Arrays.stream(atlasFiles).filter(f -> ColorTestUtil.normalizeName(f.getName()).contains(key)).toArray(File[]::new);
         }
 
         if (atlasFiles.length == 0) {
@@ -60,11 +62,7 @@ public final class GrayscaleAtlasTest {
             return;
         }
 
-        List<Grayscale> methods = GrayscaleRegistry.getMethods();
-
-        if (!filterMethod.isEmpty()) {
-            methods = methods.stream().filter(m -> m.displayName().contains(filterMethod)).collect(java.util.stream.Collectors.toList());
-        }
+        List<Grayscale> methods = ColorTestUtil.filterMethods(filterMethod);
 
         if (methods.isEmpty()) {
             System.err.println("No matching grayscale methods found.");

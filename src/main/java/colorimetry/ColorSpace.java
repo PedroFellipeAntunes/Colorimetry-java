@@ -7,7 +7,7 @@ package colorimetry;
  * Parent hierarchy:
  *   All spaces descend from Xyz (the root). Each child declares parentSpace(),
  *   toParent() and fromParent(). Conversions walk up to the Lowest Common
- *   Ancestor (LCA) and back down, handled by {@link ColorConverter}.
+ *   Ancestor (LCA) and back down, handled by {@link colorimetry.engine.ColorConverter}.
  *
  * Normalization contract (user convenience only):
  *   normalize   -- maps raw values to [0, 1] range so the user never needs to know
@@ -19,8 +19,39 @@ package colorimetry;
  *   componentCount    -- number of channels (3 for most, 4 for CMYK).
  *   componentName     -- full or short name of channel i.
  *   componentMin/Max  -- raw value range for channel i.
+ *
+ * Cylindrical metadata:
+ *   isCylindrical     -- whether this space uses polar coordinates (hue + radius).
+ *   hueChannel        -- index of the angular channel (0–360°). Throws if not cylindrical.
+ *   radialChannel     -- index of the radial channel (chroma/saturation). Throws if not cylindrical.
  */
 public interface ColorSpace {
+    // ===== UTILITIES =====
+
+    /**
+     * Clamps a value to the given range.
+     *
+     * @param value input value
+     * @param min range minimum
+     * @param max range maximum
+     * @return clamped value in [min, max]
+     */
+    static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Wraps a value into [0, max) using modular arithmetic.
+     * Handles negative inputs correctly.
+     *
+     * @param value input value
+     * @param max exclusive upper bound
+     * @return wrapped value in [0, max)
+     */
+    static double wrap(double value, double max) {
+        return ((value % max) + max) % max;
+    }
+
     // ===== NORMALIZATION (user convenience) =====
 
     /**
@@ -40,6 +71,23 @@ public interface ColorSpace {
     double[] denormalize(double[] normalized);
 
     // ===== GAMUT =====
+
+    /**
+     * Whether channel i has hard limits on its raw values.
+     * Bounded channels are enforced by input validation when a
+     * {@link ValidationMode} other than NONE is active.
+     *
+     * Spaces where all channels are bounded can rely on the default
+     * (delegates to {@link #isBounded()}). Unbounded spaces should
+     * override to return true only for channels with physical limits
+     * (e.g. lightness, hue angles).
+     *
+     * @param i channel index
+     * @return true if channel i has hard min/max limits
+     */
+    default boolean isChannelBounded(int i) {
+        return isBounded();
+    }
 
     /**
      * Whether this space has a finite gamut (e.g. sRGB=true, Lab=false).
@@ -77,7 +125,7 @@ public interface ColorSpace {
 
     /**
      * Neutral gray point guaranteed to be in-gamut.
-     * Used by {@link GamutMapper} as the bisection anchor.
+     * Used by {@link colorimetry.engine.GamutMapper} as the bisection anchor.
      * Child spaces inherit from their parent.
      *
      * @return CIE XYZ D65 triplet
@@ -186,6 +234,66 @@ public interface ColorSpace {
      */
     default double componentStep(int i) {
         return 1.0;
+    }
+
+    // ===== CYLINDRICAL METADATA =====
+    
+    /**
+     * Whether this space uses cylindrical coordinates (hue angle + radius).
+     * Cylindrical spaces require angular interpolation on the hue channel and
+     * polar layout in UI representations.
+     *
+     * @return true if this space has a hue angle and radial channel
+     */
+    default boolean isCylindrical() {
+        return false;
+    }
+
+    /**
+     * Index of the hue channel (angle in degrees, 0–360). Only meaningful when
+     * {@link #isCylindrical()} returns true.
+     *
+     * @return channel index of the hue angle
+     */
+    default int hueChannel() {
+        throw new UnsupportedOperationException(displayName() + " is not cylindrical");
+    }
+
+    /**
+     * Index of the radial channel (chroma or saturation). Only meaningful when
+     * {@link #isCylindrical()} returns true.
+     *
+     * @return channel index of the radial component
+     */
+    default int radialChannel() {
+        throw new UnsupportedOperationException(displayName() + " is not cylindrical");
+    }
+
+    /**
+     * Returns the interface type accepted by this space's {@code of()} factory,
+     * or {@code null} if this space has a fixed parent.
+     *
+     * Enables runtime discovery of valid parents via the registry:
+     * {@code registry.getSpaces().stream().filter(type::isInstance)}
+     *
+     * @return parent type class, or null if parent is not configurable
+     */
+    default Class<? extends ColorSpace> acceptedParentType() {
+        return null;
+    }
+
+    // ===== RAW VALUE FORMATTING =====
+
+    /**
+     * Formats a raw channel value for external reading. Override in spaces
+     * where raw values are expected as integers (e.g. RGB 0-255).
+     * Not used in the conversion pipeline.
+     *
+     * @param value raw channel value
+     * @return formatted value (default: unchanged)
+     */
+    default double formatRaw(double value) {
+        return value;
     }
 
     // ===== PARENT HIERARCHY =====

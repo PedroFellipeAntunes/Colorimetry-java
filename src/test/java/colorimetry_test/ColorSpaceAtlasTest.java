@@ -1,5 +1,6 @@
 package colorimetry_test;
 
+import colorimetry_test.utils.ColorTestUtil;
 import colorimetry.*;
 import colorimetry_test.utils.*;
 
@@ -39,15 +40,10 @@ public final class ColorSpaceAtlasTest {
         File outputDir = new File("color_tests/color_spaces");
         outputDir.mkdirs();
 
-        // Resolve filter: args[0] > FILTER_SPACE > all
         String filterSpace = args.length > 0 ? args[0] : FILTER_SPACE;
         int gridChannel = args.length > 1 ? Integer.parseInt(args[1]) : GRID_CHANNEL;
 
-        List<ColorSpace> spaces = ColorSpaceRegistry.getSpaces();
-
-        if (!filterSpace.isEmpty()) {
-            spaces = spaces.stream().filter(s -> s.displayName().contains(filterSpace)).collect(java.util.stream.Collectors.toList());
-        }
+        List<ColorSpace> spaces = ColorTestUtil.filterSpaces(filterSpace);
 
         if (spaces.isEmpty()) {
             System.err.println("No matching color spaces found.");

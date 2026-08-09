@@ -1,7 +1,7 @@
 package colorimetry_test;
 
+import colorimetry_test.utils.ColorTestUtil;
 import colorimetry.*;
-import colorimetry.spaces.*;
 import colorimetry_test.utils.ErrorLog;
 
 import javax.imageio.ImageIO;
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public final class GrayscaleGradientTest {
     /** Color space for the reference gradient. Overridden by args[0]. */
-    private static final ColorSpace GRADIENT_SPACE = Hsl.INSTANCE;
+    private static final String DEFAULT_SPACE = "HSL";
 
     /** Which channel (0, 1, or 2) varies across X. Overridden by args[1]. */
     private static final int GRADIENT_CHANNEL = 0;
@@ -36,15 +36,16 @@ public final class GrayscaleGradientTest {
         File outputDir = new File("color_tests/grayscale/gradient");
         outputDir.mkdirs();
 
-        // Resolve gradient space: args[0] > GRADIENT_SPACE
-        ColorSpace gradientSpace = GRADIENT_SPACE;
+        // Resolve gradient space: args[0] > DEFAULT_SPACE
+        String spaceName = args.length > 0 ? args[0] : DEFAULT_SPACE;
 
-        if (args.length > 0) {
-            String spaceName = args[0];
-            gradientSpace = ColorSpaceRegistry.getSpaces().stream()
-                .filter(s -> s.displayName().contains(spaceName))
-                .findFirst()
-                .orElse(GRADIENT_SPACE);
+        List<ColorSpace> spaceMatches = ColorTestUtil.filterSpaces(spaceName);
+        ColorSpace gradientSpace = spaceMatches.isEmpty() ? null : spaceMatches.get(0);
+
+        if (gradientSpace == null) {
+            System.err.println("Space not found: " + spaceName);
+
+            return;
         }
 
         // Resolve channel: args[1] > GRADIENT_CHANNEL
@@ -77,11 +78,7 @@ public final class GrayscaleGradientTest {
         double yMin = gradientSpace.componentMin(yCh);
         double yMax = gradientSpace.componentMax(yCh);
 
-        List<Grayscale> methods = GrayscaleRegistry.getMethods();
-
-        if (!filterMethod.isEmpty()) {
-            methods = methods.stream().filter(m -> m.displayName().contains(filterMethod)).collect(java.util.stream.Collectors.toList());
-        }
+        List<Grayscale> methods = ColorTestUtil.filterMethods(filterMethod);
 
         if (methods.isEmpty()) {
             System.err.println("No matching grayscale methods found.");
@@ -128,8 +125,8 @@ public final class GrayscaleGradientTest {
         BufferedImage refImage = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         refImage.setRGB(0, 0, WIDTH, HEIGHT, refPixels, 0, WIDTH);
 
-        String spaceName = gradientSpace.displayName().replace(" ", "_");
-        File refFile = new File(outputDir, "reference_" + spaceName + ".png");
+        String sanitized = ColorTestUtil.sanitizeName(gradientSpace.displayName());
+        File refFile = new File(outputDir, "reference_" + sanitized + ".png");
         ImageIO.write(refImage, "PNG", refFile);
         ColorTestUtil.printResult(refFile.getName(), System.currentTimeMillis() - refStart, refLog);
 
@@ -151,7 +148,7 @@ public final class GrayscaleGradientTest {
                         continue;
                     }
                     
-                    String context = String.format("raw=[%.1f, %.1f, %.1f]", source.getRaw()[0], source.getRaw()[1], source.getRaw()[2]);
+                    String context = String.format("raw=[%.1f, %.1f, %.1f]", source.get()[0], source.get()[1], source.get()[2]);
                     pixels[y * WIDTH + x] = ColorTestUtil.toGrayscalePixel(source, method, log, context);
                 }
             }
