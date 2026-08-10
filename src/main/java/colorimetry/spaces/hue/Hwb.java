@@ -115,14 +115,14 @@ public final class Hwb implements ColorSpace {
         double falling = brightness * (1.0 - fraction * saturation);
         double rising = brightness * (1.0 - (1.0 - fraction) * saturation);
         
-        return switch (sector % 6) {
-            case 0 -> new double[] {brightness, rising, low};
-            case 1 -> new double[] {falling, brightness, low};
-            case 2 -> new double[] {low, brightness, rising};
-            case 3 -> new double[] {low, falling, brightness};
-            case 4 -> new double[] {rising, low, brightness};
-            default -> new double[] {brightness, low, falling};
-        };
+        switch (sector % 6) {
+            case 0: return new double[] {brightness, rising, low};
+            case 1: return new double[] {falling, brightness, low};
+            case 2: return new double[] {low, brightness, rising};
+            case 3: return new double[] {low, falling, brightness};
+            case 4: return new double[] {rising, low, brightness};
+            default: return new double[] {brightness, low, falling};
+        }
     }
 
     /**

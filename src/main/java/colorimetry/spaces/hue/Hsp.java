@@ -153,41 +153,47 @@ public final class Hsp implements ColorSpace {
         // solveMaxChannel finds the max value that satisfies P² = Σ(wi * ci²).
         // mid = max*(1-s*(1-t)), min = max*(1-s) where t is the hue fraction.
         switch (sector % 6) {
-            case 0 -> {
+            case 0: {
                 double max = solveMaxChannel(p, s, fraction, wr, wg, wb);
                 red = max;
                 green = max * (1.0 - s * (1.0 - fraction));
                 blue = max * (1.0 - s);
+                break;
             }
-            case 1 -> {
+            case 1: {
                 double max = solveMaxChannel(p, s, 1.0 - fraction, wg, wr, wb);
                 green = max;
                 red = max * (1.0 - s * fraction);
                 blue = max * (1.0 - s);
+                break;
             }
-            case 2 -> {
+            case 2: {
                 double max = solveMaxChannel(p, s, fraction, wg, wb, wr);
                 green = max;
                 blue = max * (1.0 - s * (1.0 - fraction));
                 red = max * (1.0 - s);
+                break;
             }
-            case 3 -> {
+            case 3: {
                 double max = solveMaxChannel(p, s, 1.0 - fraction, wb, wg, wr);
                 blue = max;
                 green = max * (1.0 - s * fraction);
                 red = max * (1.0 - s);
+                break;
             }
-            case 4 -> {
+            case 4: {
                 double max = solveMaxChannel(p, s, fraction, wb, wr, wg);
                 blue = max;
                 red = max * (1.0 - s * (1.0 - fraction));
                 green = max * (1.0 - s);
+                break;
             }
-            default -> {
+            default: {
                 double max = solveMaxChannel(p, s, 1.0 - fraction, wr, wb, wg);
                 red = max;
                 blue = max * (1.0 - s * fraction);
                 green = max * (1.0 - s);
+                break;
             }
         }
         

@@ -117,35 +117,41 @@ public final class Hcy implements ColorSpace {
         int sector = (int) segment;
         
         switch (sector % 6) {
-            case 0 -> {
+            case 0: {
                 red = c;
                 green = secondary;
                 blue = 0;
+                break;
             }
-            case 1 -> {
+            case 1: {
                 red = secondary;
                 green = c;
                 blue = 0;
+                break;
             }
-            case 2 -> {
+            case 2: {
                 red = 0;
                 green = c;
                 blue = secondary;
+                break;
             }
-            case 3 -> {
+            case 3: {
                 red = 0;
                 green = secondary;
                 blue = c;
+                break;
             }
-            case 4 -> {
+            case 4: {
                 red = secondary;
                 green = 0;
                 blue = c;
+                break;
             }
-            default -> {
+            default: {
                 red = c;
                 green = 0;
                 blue = secondary;
+                break;
             }
         }
         

@@ -123,17 +123,20 @@ public final class ParentAtlasTest {
         int yCh;
 
         switch (gridCh) {
-            case 0 -> {
+            case 0: {
                 xCh = 1;
                 yCh = 2;
+                break;
             }
-            case 1 -> {
+            case 1: {
                 xCh = 0;
                 yCh = 2;
+                break;
             }
-            default -> {
+            default: {
                 xCh = 0;
                 yCh = 1;
+                break;
             }
         }
 

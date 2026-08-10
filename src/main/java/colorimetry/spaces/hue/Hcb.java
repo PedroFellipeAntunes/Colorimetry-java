@@ -111,14 +111,14 @@ public final class Hcb implements ColorSpace {
         double falling = v * (1.0 - fraction * s);
         double rising = v * (1.0 - (1.0 - fraction) * s);
         
-        return switch (sector % 6) {
-            case 0 -> new double[] {v, rising, low};
-            case 1 -> new double[] {falling, v, low};
-            case 2 -> new double[] {low, v, rising};
-            case 3 -> new double[] {low, falling, v};
-            case 4 -> new double[] {rising, low, v};
-            default -> new double[] {v, low, falling};
-        };
+        switch (sector % 6) {
+            case 0: return new double[] {v, rising, low};
+            case 1: return new double[] {falling, v, low};
+            case 2: return new double[] {low, v, rising};
+            case 3: return new double[] {low, falling, v};
+            case 4: return new double[] {rising, low, v};
+            default: return new double[] {v, low, falling};
+        }
     }
 
     /**

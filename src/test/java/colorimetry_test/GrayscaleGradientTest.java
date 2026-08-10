@@ -58,17 +58,20 @@ public final class GrayscaleGradientTest {
         int fixedCh;
         
         switch (xCh) {
-            case 0 -> {
+            case 0: {
                 yCh = 2;
                 fixedCh = 1;
+                break;
             }
-            case 1 -> {
+            case 1: {
                 yCh = 2;
                 fixedCh = 0;
+                break;
             }
-            default -> {
+            default: {
                 yCh = 1;
                 fixedCh = 0;
+                break;
             }
         }
 
