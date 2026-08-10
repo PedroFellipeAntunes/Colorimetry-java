@@ -74,7 +74,7 @@ ColorValue sky = ColorValue.of(Hsb.INSTANCE, 210, 80, 90);
 // Convert to any other space - the result uses that space's native values
 ColorValue lab = sky.to(CieLab.INSTANCE);
 double lightness = lab.get(0); // L* in [0, 100]
-double greenRed  = lab.get(1); // a* in [-128, 127]
+double greenRed = lab.get(1); // a* in [-128, 127]
 
 // Or create with normalized 0-1 values without knowing each space's ranges
 ColorValue color = ColorValue.ofNormalized(Oklab.INSTANCE, 0.7, 0.5, 0.3);
