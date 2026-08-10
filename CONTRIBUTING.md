@@ -36,17 +36,16 @@ Requires Java 14+.
 
 1. Create a class in the appropriate subpackage under `colorimetry/spaces/` (e.g. `spaces/hue/`, `spaces/perceptual/`, `spaces/cam/`). Implement `ColorSpace`.
 2. Add a `public static final INSTANCE` singleton as the first field.
-3. Organize the class with section headers: `// ===== METADATA =====`, `// ===== MATH =====`, `// ===== PARENT HIERARCHY =====`, `// ===== COLORSPACE OVERRIDES =====`.
-4. Implement metadata: `displayName`, `componentCount`, `componentName`, `componentMin`, `componentMax`, `componentDefault`, `componentStep`.
-5. Declare `parentSpace()` - pick the closest existing space in the hierarchy.
-6. Implement `toParent()` and `fromParent()` with the conversion math.
-7. Implement `normalize()` and `denormalize()` for the 0-1 range mapping.
-8. Root spaces (parent = `Xyz`) must also override `isBounded()`, `isInGamut()`, and `neutralXyz()`. Child spaces inherit these from their root ancestor.
-9. For cylindrical spaces, override `isCylindrical()` (return `true`), `hueChannel()`, and `radialChannel()`.
-10. For spaces where only some channels are bounded, override `isChannelBounded(int i)`.
-11. For spaces with a configurable parent, implement a static `of(parent)` factory and override `acceptedParentType()` returning the appropriate marker interface (`RgbLike.class`, `XyzLike.class`, or `LabLike.class`).
-12. Register in `ColorSpaceRegistry` static block.
-13. Run `ColorSpaceAtlasTest` and `ColorSpaceTreeTest` to verify the atlas visually and confirm the hierarchy is correct. Then run `ColorSpaceGamutExport` and check that all normalized values in the CSV fall within [0, 1]. Values outside this range indicate incorrect `normalize`/`denormalize` or wrong `componentMin`/`componentMax` bounds. See [Testing](docs/TESTING.md) for details on each test and its arguments.
+3. Implement metadata: `displayName`, `componentCount`, `componentName`, `componentMin`, `componentMax`, `componentDefault`, `componentStep`.
+4. Declare `parentSpace()` - pick the closest existing space in the hierarchy.
+5. Implement `toParent()` and `fromParent()` with the conversion math.
+6. Implement `normalize()` and `denormalize()` for the 0-1 range mapping.
+7. Root spaces (parent = `Xyz`) must also override `isBounded()`, `isInGamut()`, and `neutralXyz()`. Child spaces inherit these from their root ancestor.
+8. For cylindrical spaces, override `isCylindrical()` (return `true`), `hueChannel()`, and `radialChannel()`.
+9. For spaces where only some channels are bounded, override `isChannelBounded(int i)`.
+10. For spaces with a configurable parent, implement a static `of(parent)` factory and override `acceptedParentType()` returning the appropriate marker interface (`RgbLike.class`, `XyzLike.class`, or `LabLike.class`).
+11. Register in `ColorSpaceRegistry` static block.
+12. Run `ColorSpaceAtlasTest`, `ColorSpaceTreeTest`, and `ColorSpaceGamutExport` to verify. See [Testing](docs/TESTING.md) for details on each test and its arguments.
 
 ## Adding a grayscale method
 
