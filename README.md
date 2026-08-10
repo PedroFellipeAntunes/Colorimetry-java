@@ -100,15 +100,13 @@ ColorValue gray = sky.toGrayscale(Bt709Luma.INSTANCE);
 
 ### Validation
 
-`ValidationMode` controls what happens when you create a color with out-of-range values on bounded channels.
-
-For example, `ColorValue.of(Hsb.INSTANCE, 400, 120, 90)` has H=400 (max is 360) and S=120 (max is 100). By default these pass through silently, but you can change that:
+`ValidationMode` controls how the library handles invalid or incompatible input, such as out-of-range values on bounded channels or operations between colors in different spaces. By default, issues pass through silently, but you can change that:
 
 ```java
-// Clamp bounded channels to their valid range silently
-ColorValue.setValidationMode(ValidationMode.CLAMP);
+// Resolve issues silently (clamps values, converts spaces, etc.)
+ColorValue.setValidationMode(ValidationMode.RESOLVE);
 
-// Or throw an exception on out-of-range bounded channels
+// Or throw an exception on invalid input
 ColorValue.setValidationMode(ValidationMode.ERROR);
 
 // Disable (default)
@@ -124,7 +122,7 @@ Conversions are automatic. Call `.to(targetSpace)` and the library handles the r
 ```java
 ColorValue sky = ColorValue.of(Hsb.INSTANCE, 210, 80, 90);
 ColorValue lab = sky.to(CieLab.INSTANCE);
-ColorValue ok = lab.to(Oklab.INSTANCE);
+ColorValue ok  = lab.to(Oklab.INSTANCE);
 ```
 
 ### Hierarchy
