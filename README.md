@@ -122,7 +122,7 @@ Conversions are automatic. Call `.to(targetSpace)` and the library handles the r
 ```java
 ColorValue sky = ColorValue.of(Hsb.INSTANCE, 210, 80, 90);
 ColorValue lab = sky.to(CieLab.INSTANCE);
-ColorValue ok  = lab.to(Oklab.INSTANCE);
+ColorValue ok = lab.to(Oklab.INSTANCE);
 ```
 
 ### Hierarchy
