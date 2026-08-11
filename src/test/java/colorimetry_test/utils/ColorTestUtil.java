@@ -3,6 +3,7 @@ package colorimetry_test.utils;
 import colorimetry.*;
 import colorimetry.registry.ColorSpaceRegistry;
 import colorimetry.registry.GrayscaleRegistry;
+import colorimetry.registry.MetricRegistry;
 import colorimetry.spaces.rgb.SRgb;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public final class ColorTestUtil {
      * @return matching color spaces, or all if input is empty
      */
     public static List<ColorSpace> filterSpaces(String input) {
-        List<ColorSpace> spaces = ColorSpaceRegistry.getSpaces();
+        List<ColorSpace> spaces = ColorSpaceRegistry.INSTANCE.getEntries();
 
         if (input == null || input.isEmpty()) {
             return spaces;
@@ -67,7 +68,7 @@ public final class ColorTestUtil {
      * @return matching grayscale methods, or all if input is empty
      */
     public static List<Grayscale> filterMethods(String input) {
-        List<Grayscale> methods = GrayscaleRegistry.getMethods();
+        List<Grayscale> methods = GrayscaleRegistry.INSTANCE.getEntries();
 
         if (input == null || input.isEmpty()) {
             return methods;
@@ -76,6 +77,25 @@ public final class ColorTestUtil {
         String key = normalizeName(input);
 
         return methods.stream().filter(m -> normalizeName(m.displayName()).contains(key)).collect(Collectors.toList());
+    }
+
+    /**
+     * Filters registered distance metrics whose normalized display name contains
+     * the normalized input. Returns all metrics if input is null or empty.
+     *
+     * @param input user filter string
+     * @return matching distance metrics, or all if input is empty
+     */
+    public static List<DistanceMetric> filterMetrics(String input) {
+        List<DistanceMetric> metrics = MetricRegistry.INSTANCE.getEntries();
+
+        if (input == null || input.isEmpty()) {
+            return metrics;
+        }
+
+        String key = normalizeName(input);
+
+        return metrics.stream().filter(m -> normalizeName(m.displayName()).contains(key)).collect(Collectors.toList());
     }
 
     // ===== SAFE PIXEL CONVERSION =====

@@ -25,7 +25,7 @@ public final class ColorSpaceTreeTest {
         Map<ColorSpace, List<ColorSpace>> children = new LinkedHashMap<>();
         children.put(Xyz.INSTANCE, new ArrayList<>());
 
-        for (ColorSpace space : ColorSpaceRegistry.getSpaces()) {
+        for (ColorSpace space : ColorSpaceRegistry.INSTANCE.getEntries()) {
             children.putIfAbsent(space, new ArrayList<>());
             ColorSpace parent = space.parentSpace();
 
@@ -41,7 +41,7 @@ public final class ColorSpaceTreeTest {
         printChildren(Xyz.INSTANCE, children, "");
 
         // Summary
-        List<ColorSpace> all = ColorSpaceRegistry.getSpaces();
+        List<ColorSpace> all = ColorSpaceRegistry.INSTANCE.getEntries();
         long bounded = all.stream().filter(ColorSpace::isBounded).count();
         long cylindrical = all.stream().filter(ColorSpace::isCylindrical).count();
         long palette = all.stream().filter(ColorSpace::hasPalette).count();

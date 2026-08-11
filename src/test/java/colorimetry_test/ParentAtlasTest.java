@@ -71,7 +71,7 @@ public final class ParentAtlasTest {
         }
 
         // Find all registered spaces that match the accepted parent type
-        List<ColorSpace> validParents = ColorSpaceRegistry.getSpaces().stream()
+        List<ColorSpace> validParents = ColorSpaceRegistry.INSTANCE.getEntries().stream()
             .filter(parentType::isInstance)
             .collect(java.util.stream.Collectors.toList());
 

@@ -8,160 +8,89 @@ import colorimetry.spaces.perceptual.*;
 import colorimetry.spaces.rgb.*;
 import colorimetry.spaces.xyz.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Central registry for color spaces.
  * Pre-populated with all built-in spaces in the static initializer.
- * Users can add custom spaces via {@link #register(ColorSpace)}.
+ * Users can add custom spaces via {@link Registry#register(Object)}.
  */
 public final class ColorSpaceRegistry {
-    private static final List<ColorSpace> SPACES = new ArrayList<>();
+    public static final Registry<ColorSpace> INSTANCE = new Registry<>("ColorSpace", ColorSpace::displayName);
 
     static {
-        // XYZ adapted spaces (Xyz root is internal, not registered)
-        register(XyzD65.INSTANCE);
-        register(XyzD50.INSTANCE);
-        register(XyzD60.INSTANCE);
-        register(Xyy.INSTANCE);
+        // XYZ adapted
+        INSTANCE.register(XyzD65.INSTANCE);
+        INSTANCE.register(XyzD50.INSTANCE);
+        INSTANCE.register(XyzD60.INSTANCE);
+        INSTANCE.register(Xyy.INSTANCE);
 
-        // Linear RGB spaces
-        register(Bt709RgbLinear.INSTANCE);
-        register(Bt601RgbLinear.INSTANCE);
-        register(Bt2020RgbLinear.INSTANCE);
-        register(DisplayP3Linear.INSTANCE);
-        register(AdobeRgbLinear.INSTANCE);
-        register(ProPhotoRgbLinear.INSTANCE);
-        register(Aces2065.INSTANCE);
-        register(AcesCg.INSTANCE);
+        // Linear RGB
+        INSTANCE.register(Bt709RgbLinear.INSTANCE);
+        INSTANCE.register(Bt601RgbLinear.INSTANCE);
+        INSTANCE.register(Bt2020RgbLinear.INSTANCE);
+        INSTANCE.register(DisplayP3Linear.INSTANCE);
+        INSTANCE.register(AdobeRgbLinear.INSTANCE);
+        INSTANCE.register(ProPhotoRgbLinear.INSTANCE);
 
-        // Gamma RGB spaces
-        register(SRgb.INSTANCE);
-        register(DisplayP3.INSTANCE);
-        register(AdobeRgb.INSTANCE);
-        register(ProPhotoRgb.INSTANCE);
-        register(Rec2020.INSTANCE);
+        // Gamma RGB
+        INSTANCE.register(SRgb.INSTANCE);
+        INSTANCE.register(AdobeRgb.INSTANCE);
+        INSTANCE.register(DisplayP3.INSTANCE);
+        INSTANCE.register(ProPhotoRgb.INSTANCE);
+        INSTANCE.register(Rec2020.INSTANCE);
 
         // Subtractive and artistic
-        register(Cmy.INSTANCE);
-        register(Cmyk.INSTANCE);
-        register(Ryb.INSTANCE);
+        INSTANCE.register(Cmy.INSTANCE);
+        INSTANCE.register(Cmyk.INSTANCE);
+        INSTANCE.register(Ryb.INSTANCE);
 
-        // Hue-based (cylindrical from RGB)
-        register(Hsb.INSTANCE);
-        register(Hsl.INSTANCE);
-        register(Hsi.INSTANCE);
-        register(Hcb.INSTANCE);
-        register(Hcl.INSTANCE);
-        register(Hcy.INSTANCE);
-        register(Hwb.INSTANCE);
-        register(Hsp.INSTANCE);
+        // Hue-based
+        INSTANCE.register(Hsb.INSTANCE);
+        INSTANCE.register(Hsl.INSTANCE);
+        INSTANCE.register(Hsi.INSTANCE);
+        INSTANCE.register(Hcb.INSTANCE);
+        INSTANCE.register(Hcl.INSTANCE);
+        INSTANCE.register(Hcy.INSTANCE);
+        INSTANCE.register(Hwb.INSTANCE);
+        INSTANCE.register(Hsp.INSTANCE);
+        INSTANCE.register(Hsluv.INSTANCE);
+        INSTANCE.register(Hpluv.INSTANCE);
+        INSTANCE.register(OkHsl.INSTANCE);
+        INSTANCE.register(OkHsv.INSTANCE);
 
-        // CIE perceptual spaces
-        register(CieLab.INSTANCE);
-        register(CieLch.INSTANCE);
-        register(CieLuv.INSTANCE);
-        register(CieLchuv.INSTANCE);
-
-        // Luv-based bounded hue spaces
-        register(Hsluv.INSTANCE);
-        register(Hpluv.INSTANCE);
+        // CIE perceptual
+        INSTANCE.register(CieLab.INSTANCE);
+        INSTANCE.register(CieLch.INSTANCE);
+        INSTANCE.register(CieLuv.INSTANCE);
+        INSTANCE.register(CieLchuv.INSTANCE);
 
         // LMS and derivatives
-        register(LmsHpe.INSTANCE);
-        register(Ipt.INSTANCE);
-        register(IgPgTg.INSTANCE);
+        INSTANCE.register(LmsHpe.INSTANCE);
+        INSTANCE.register(Ipt.INSTANCE);
+        INSTANCE.register(IgPgTg.INSTANCE);
 
-        // Modern perceptual spaces
-        register(Oklab.INSTANCE);
-        register(Oklch.INSTANCE);
-        register(OkHsl.INSTANCE);
-        register(OkHsv.INSTANCE);
-        register(JzAzBz.INSTANCE);
-        register(JzCzHz.INSTANCE);
-        register(ICtCp.INSTANCE);
-        register(Xyb.INSTANCE);
-        register(Msh.INSTANCE);
+        // Modern perceptual
+        INSTANCE.register(Oklab.INSTANCE);
+        INSTANCE.register(Oklch.INSTANCE);
+        INSTANCE.register(JzAzBz.INSTANCE);
+        INSTANCE.register(JzCzHz.INSTANCE);
+        INSTANCE.register(ICtCp.INSTANCE);
+        INSTANCE.register(Xyb.INSTANCE);
+        INSTANCE.register(Msh.INSTANCE);
 
-        // Color Appearance Models
-        register(Cam16.INSTANCE);
-        register(Cam16Ucs.INSTANCE);
-        register(Cam02.INSTANCE);
-        register(Cam02Ucs.INSTANCE);
-        register(Hct.INSTANCE);
-        register(Zcam.INSTANCE);
+        // ACES
+        INSTANCE.register(Aces2065.INSTANCE);
+        INSTANCE.register(AcesCg.INSTANCE);
+
+        // CAM
+        INSTANCE.register(Cam16.INSTANCE);
+        INSTANCE.register(Cam16Ucs.INSTANCE);
+        INSTANCE.register(Cam02.INSTANCE);
+        INSTANCE.register(Cam02Ucs.INSTANCE);
+        INSTANCE.register(Hct.INSTANCE);
+        INSTANCE.register(Zcam.INSTANCE);
     }
 
     private ColorSpaceRegistry() {}
-
-    /**
-     * Adds a color space to the registry.
-     *
-     * @param space color space to register
-     * @throws IllegalArgumentException if space is null or already registered
-     */
-    public static void register(ColorSpace space) {
-        if (space == null) {
-            throw new IllegalArgumentException("ColorSpace cannot be null");
-        }
-
-        if (SPACES.contains(space)) {
-            throw new IllegalArgumentException("ColorSpace already registered: " + space.displayName());
-        }
-
-        SPACES.add(space);
-    }
-
-    /**
-     * Removes a specific color space from the registry.
-     *
-     * @param space color space to remove
-     * @throws IllegalArgumentException if space is null or not registered
-     */
-    public static void unregister(ColorSpace space) {
-        if (space == null) {
-            throw new IllegalArgumentException("ColorSpace cannot be null");
-        }
-
-        if (!SPACES.remove(space)) {
-            throw new IllegalArgumentException("ColorSpace not registered: " + space.displayName());
-        }
-    }
-
-    /**
-     * Checks whether a color space is already registered.
-     *
-     * @param space color space to look up
-     * @return true if the space is in the registry
-     * @throws IllegalArgumentException if space is null
-     */
-    public static boolean contains(ColorSpace space) {
-        if (space == null) {
-            throw new IllegalArgumentException("ColorSpace cannot be null");
-        }
-
-        return SPACES.contains(space);
-    }
-
-    /**
-     * Returns the number of registered color spaces.
-     *
-     * @return registry size
-     */
-    public static int size() {
-        return SPACES.size();
-    }
-
-    /**
-     * Returns all registered color spaces.
-     *
-     * @return unmodifiable list of color spaces
-     */
-    public static List<ColorSpace> getSpaces() {
-        return Collections.unmodifiableList(SPACES);
-    }
 
     /**
      * Returns the first registered color space that supports 2D palette display.
@@ -169,13 +98,6 @@ public final class ColorSpaceRegistry {
      * @return a palette-capable color space, or null if none is registered
      */
     public static ColorSpace getPaletteSpace() {
-        return SPACES.stream().filter(ColorSpace::hasPalette).findFirst().orElse(null);
-    }
-
-    /**
-     * Removes all registered spaces. Intended for testing.
-     */
-    public static void clear() {
-        SPACES.clear();
+        return INSTANCE.getEntries().stream().filter(ColorSpace::hasPalette).findFirst().orElse(null);
     }
 }

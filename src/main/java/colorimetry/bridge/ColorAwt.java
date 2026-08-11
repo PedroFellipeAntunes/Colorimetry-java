@@ -23,7 +23,7 @@ public final class ColorAwt {
         int r = (int) Math.round(ColorSpace.clamp(rgb.get(0), 0.0, 255.0));
         int g = (int) Math.round(ColorSpace.clamp(rgb.get(1), 0.0, 255.0));
         int b = (int) Math.round(ColorSpace.clamp(rgb.get(2), 0.0, 255.0));
-        int a = (int) Math.round(color.alpha() * 255.0);
+        int a = (int) Math.round(color.alpha() / ColorValue.ALPHA_MAX * 255.0);
 
         return new java.awt.Color(r, g, b, a);
     }
@@ -32,9 +32,15 @@ public final class ColorAwt {
      * Creates a ColorValue in sRGB from a java.awt.Color.
      *
      * @param color AWT Color source
-     * @return new ColorValue in sRGB, alpha=1.0
+     * @return new ColorValue in sRGB with normalized alpha
      */
     public static ColorValue fromAWT(java.awt.Color color) {
-        return ColorValue.of(SRgb.INSTANCE, color.getRed(), color.getGreen(), color.getBlue());
+        double alpha = color.getAlpha() / 255.0 * ColorValue.ALPHA_MAX;
+
+        return ColorValue.of(
+            SRgb.INSTANCE,
+            new double[] {color.getRed(), color.getGreen(), color.getBlue()},
+            alpha
+        );
     }
 }
