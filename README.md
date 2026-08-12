@@ -56,7 +56,7 @@ cd Colorimetry-java
 mvn install
 ```
 
-Requires Java 14+.
+Requires Java 11+.
 
 ## Usage
 

@@ -30,7 +30,7 @@ cd Colorimetry-java
 mvn compile
 ```
 
-Requires Java 14+.
+Requires Java 11+.
 
 ## Adding a color space
 
