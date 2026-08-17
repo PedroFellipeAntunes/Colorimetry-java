@@ -83,10 +83,9 @@ ColorValue color = ColorValue.ofNormalized(Oklab.INSTANCE, 0.7, 0.5, 0.3);
 ColorValue semi = ColorValue.of(Hsb.INSTANCE, new double[]{210, 80, 90}, 0.5);
 double alpha = semi.alpha(); // 0.5
 
-// Hex - always works, from any space
+// Hex - from any space
 String hex = sky.toHex(); // "#2E8BE6"
 ColorValue fromHex = sky.fromHex("#FF6600"); // stays in HSB
-ColorValue parsed = ColorValue.parseHex("#FF6600"); // returns sRGB
 
 // java.awt.Color bridge
 java.awt.Color awt = sky.toAWT();
